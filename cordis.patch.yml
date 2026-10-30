@@ -1,0 +1,20 @@
+- insert:
+    - id: x6-core
+      name: '@x6_ai/dsh-plugin-x6-core'
+      config:
+        lines:
+          - id: default
+            label: X6
+            origin: https://x6-api.appexc.net
+            harnessOrigin: https://x6-harness-api.appexc.net
+            pluginCatalogOrigin: https://x6-console.appexc.net
+            consoleOrigin: https://x6-console.appexc.net
+        forcePinnedLine: ''
+        pinnedLine: ''
+        probeTimeoutMs: 2500
+        probeCacheTtlMs: 600000
+        deviceName: ''
+        pluginCatalogOrigin: ''
+        consoleOrigin: ''
+# Keep ui-brand-official enabled: showBrand=false unregisters our slots so DSH
+# official (or shell FishLogo / local-build fallbacks) show again.

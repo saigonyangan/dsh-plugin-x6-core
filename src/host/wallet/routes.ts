@@ -1,0 +1,221 @@
+/** Host routes for wallet status + balance (Harness refresh + wallet). */
+
+import type { Context } from '@deepseek-ai/cordis'
+import { credentialRef } from '@deepseek-ai/dsh-credentials'
+import type {} from '@deepseek-ai/dsh-client-connection'
+import {
+  apiErr,
+  apiOk,
+} from '../../shared/auth-contract.ts'
+import {
+  CREDENTIAL_REF,
+  REFRESH_CREDENTIAL_REF,
+} from '../../shared/provider.ts'
+import { type SupaLine } from '../../shared/line.ts'
+import { matchesStoredKeyPrefix } from '../../shared/key-prefix.ts'
+import {
+  WALLET_ERROR,
+  WALLET_PATH,
+  WALLET_STATUS_PATH,
+  buildUsagePoliciesUrl,
+  type WalletBalanceResponse,
+  type WalletStatusResponse,
+} from '../../shared/wallet-contract.ts'
+import type { Config } from '../config.ts'
+import { resolveAuthLine } from '../line/resolver.ts'
+import { resolveConsoleOrigin } from '../plugin-market/catalog-origin.ts'
+import { readSettings } from '../settings/device.ts'
+import {
+  fetchWallet,
+  messageForCode,
+  refreshSession,
+} from '../auth/harness-client.ts'
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+interface AccessCache {
+  readonly accessToken: string
+  readonly expiresAt: number
+  readonly lineId: string
+}
+
+let accessCache: AccessCache | undefined
+
+/** Test helper: clear in-memory access token cache. */
+export function resetWalletAccessCache(): void {
+  accessCache = undefined
+}
+
+async function isApiKeyConfigured(ctx: Context): Promise<boolean> {
+  const info = await ctx.credentials.describe(credentialRef(CREDENTIAL_REF))
+  return info.configured
+}
+
+async function resolveApiKeySecret(ctx: Context): Promise<string | undefined> {
+  const resolved = await ctx.credentials.resolve(credentialRef(CREDENTIAL_REF))
+  const value = resolved?.value?.trim()
+  return value !== undefined && value.length > 0 ? value : undefined
+}
+
+/** True when live API key still matches OAuth-stored keyPrefix (or prefix unset). */
+async function isCredentialAligned(ctx: Context, keyPrefix: string): Promise<boolean> {
+  if (keyPrefix.trim().length === 0) return true
+  const secret = await resolveApiKeySecret(ctx)
+  if (secret === undefined) return false
+  return matchesStoredKeyPrefix(secret, keyPrefix)
+}
+
+async function resolveRefreshToken(ctx: Context): Promise<string | undefined> {
+  const resolved = await ctx.credentials.resolve(credentialRef(REFRESH_CREDENTIAL_REF))
+  const value = resolved?.value?.trim()
+  return value !== undefined && value.length > 0 ? value : undefined
+}
+
+async function ensureAccessToken(
+  ctx: Context,
+  config: Config,
+  locale: string | undefined,
+): Promise<{ accessToken: string; lineId: string; line: SupaLine }> {
+  const { winner } = await resolveAuthLine(ctx, config)
+  const line = winner.line
+  const now = Date.now()
+  if (
+    accessCache !== undefined
+    && accessCache.expiresAt > now + 15_000
+    && accessCache.lineId === line.id
+  ) {
+    return { accessToken: accessCache.accessToken, lineId: accessCache.lineId, line }
+  }
+
+  const refreshToken = await resolveRefreshToken(ctx)
+  if (refreshToken === undefined) {
+    throw Object.assign(new Error('会话已失效，请重新快速配置。'), {
+      code: WALLET_ERROR.sessionRevoked,
+    })
+  }
+
+  try {
+    const tokens = await refreshSession(line, refreshToken, locale)
+    await ctx.credentials.set(credentialRef(REFRESH_CREDENTIAL_REF), tokens.refreshToken)
+    accessCache = {
+      accessToken: tokens.accessToken,
+      expiresAt: now + Math.max(30, tokens.expiresIn - 30) * 1000,
+      lineId: line.id,
+    }
+    return { accessToken: tokens.accessToken, lineId: line.id, line }
+  } catch (error: unknown) {
+    accessCache = undefined
+    const message = error instanceof Error ? error.message : messageForCode('harness.session_revoked')
+    throw Object.assign(new Error(message), { code: WALLET_ERROR.sessionRevoked })
+  }
+}
+
+async function pickLineForConsole(ctx: Context, config: Config): Promise<SupaLine> {
+  const { winner } = await resolveAuthLine(ctx, config)
+  return winner.line
+}
+
+function usagePoliciesUrlFor(config: Config, line: SupaLine): string {
+  return buildUsagePoliciesUrl(resolveConsoleOrigin(config, line))
+}
+
+/** Register wallet status and balance Host API routes. */
+export function registerWalletRoutes(ctx: Context, config: Config): void {
+  ctx.effect(() => ctx.connection.fetch.register({
+    path: WALLET_STATUS_PATH,
+    methods: ['GET'],
+    requestBody: 'buffered',
+    fetch: async () => {
+      try {
+        const connected = await isApiKeyConfigured(ctx)
+        const settings = readSettings(config)
+        const credentialAligned = connected
+          ? await isCredentialAligned(ctx, settings.keyPrefix)
+          : true
+        const line = await pickLineForConsole(ctx, config)
+        const body = apiOk<WalletStatusResponse>({
+          connected,
+          credentialAligned,
+          usagePoliciesUrl: usagePoliciesUrlFor(config, line),
+          ...(settings.keyPrefix.length > 0 ? { keyPrefix: settings.keyPrefix } : {}),
+        })
+        return jsonResponse(body)
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : '无法读取连接状态。'
+        return jsonResponse(apiErr(message), 500)
+      }
+    },
+  }), 'x6: wallet.status')
+
+  ctx.effect(() => ctx.connection.fetch.register({
+    path: WALLET_PATH,
+    methods: ['GET'],
+    requestBody: 'buffered',
+    fetch: async (request) => {
+      try {
+        const connected = await isApiKeyConfigured(ctx)
+        if (!connected) {
+          return jsonResponse(apiErr('尚未配置 X6，请先完成快速配置。', WALLET_ERROR.notConnected), 400)
+        }
+
+        const settings = readSettings(config)
+        const aligned = await isCredentialAligned(ctx, settings.keyPrefix)
+        if (!aligned) {
+          return jsonResponse(
+            apiErr(
+              'API Key 已变更，请打开设置 → 模型，重新执行 X6 快速配置。',
+              WALLET_ERROR.credentialMismatch,
+            ),
+            400,
+          )
+        }
+
+        const deviceId = settings.deviceId.trim()
+        if (deviceId.length === 0) {
+          return jsonResponse(apiErr('缺少设备标识，请重新快速配置。', WALLET_ERROR.noDevice), 400)
+        }
+
+        const locale = new URL(request.url).searchParams.get('locale') ?? undefined
+        const { accessToken, line } = await ensureAccessToken(ctx, config, locale)
+        const wallet = await fetchWallet(
+          line,
+          accessToken,
+          deviceId,
+          locale,
+        )
+
+        const body = apiOk<WalletBalanceResponse>({
+          connected: true,
+          organizationId: wallet.organizationId,
+          name: wallet.name,
+          availableBalance: wallet.availableBalance,
+          currency: wallet.currency,
+          subscriptionActive: wallet.subscriptionActive,
+          pointsRemaining: wallet.pointsRemaining,
+          pointsGranted: wallet.pointsGranted,
+          planCode: wallet.planCode,
+          planName: wallet.planName,
+          subscriptionStatus: wallet.subscriptionStatus,
+          nextPointsResetAtUnix: wallet.nextPointsResetAtUnix,
+          periodEndUnix: wallet.periodEndUnix,
+          usagePoliciesUrl: usagePoliciesUrlFor(config, line),
+          ...(settings.keyPrefix.length > 0 ? { keyPrefix: settings.keyPrefix } : {}),
+        })
+        return jsonResponse(body)
+      } catch (error: unknown) {
+        const code = typeof error === 'object' && error !== null && 'code' in error
+          && typeof (error as { code: unknown }).code === 'string'
+          ? (error as { code: string }).code
+          : undefined
+        const message = error instanceof Error ? error.message : '无法获取余额。'
+        const status = code === WALLET_ERROR.sessionRevoked ? 401 : 400
+        return jsonResponse(apiErr(message, code), status)
+      }
+    },
+  }), 'x6: wallet')
+}
