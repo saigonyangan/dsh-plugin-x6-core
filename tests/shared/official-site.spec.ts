@@ -9,7 +9,7 @@ describe('official-site', () => {
   it('resolves a single official site', () => {
     expect(resolveOfficialSiteBase({ lineId: 'cn' })).toBe(OFFICIAL_SITE)
     expect(resolveOfficialSiteBase({ lineId: 'default' })).toBe(OFFICIAL_SITE)
-    expect(resolveOfficialSiteBase({ lineOrigin: 'https://x6-api.appexc.net' })).toBe(OFFICIAL_SITE)
+    expect(resolveOfficialSiteBase({ lineOrigin: 'https://api.x6.ai' })).toBe(OFFICIAL_SITE)
     expect(resolveOfficialSiteBase({})).toBe(OFFICIAL_SITE)
   })
 

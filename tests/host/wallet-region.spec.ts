@@ -59,13 +59,13 @@ vi.mock('../../src/host/line/resolver.ts', async () => {
       const line = {
         id,
         label: id,
-        origin: id === 'cn' ? 'https://x6-api.appexc.net' : 'https://x6-api.appexc.net',
+        origin: id === 'cn' ? 'https://api.x6.ai' : 'https://api.x6.ai',
         harnessOrigin: id === 'cn'
-          ? 'https://x6-harness-api.appexc.net'
-          : 'https://x6-harness-api.appexc.net',
+          ? 'https://harness-api.x6.ai'
+          : 'https://harness-api.x6.ai',
         consoleOrigin: id === 'cn'
-          ? 'https://x6-console.appexc.net'
-          : 'https://x6-console.appexc.net',
+          ? 'https://client-api.x6.ai'
+          : 'https://client-api.x6.ai',
       }
       return {
         winner: { line, latencyMs: 0, resolvedAt: Date.now() },
@@ -95,18 +95,18 @@ const config = {
     {
       id: 'global',
       label: 'Global',
-      origin: 'https://x6-api.appexc.net',
-      harnessOrigin: 'https://x6-harness-api.appexc.net',
-      consoleOrigin: 'https://x6-console.appexc.net',
-      pluginCatalogOrigin: 'https://x6-console.appexc.net',
+      origin: 'https://api.x6.ai',
+      harnessOrigin: 'https://harness-api.x6.ai',
+      consoleOrigin: 'https://client-api.x6.ai',
+      pluginCatalogOrigin: 'https://client-api.x6.ai',
     },
     {
       id: 'cn',
       label: '中国大陆',
-      origin: 'https://x6-api.appexc.net',
-      harnessOrigin: 'https://x6-harness-api.appexc.net',
-      consoleOrigin: 'https://x6-console.appexc.net',
-      pluginCatalogOrigin: 'https://x6-console.appexc.net',
+      origin: 'https://api.x6.ai',
+      harnessOrigin: 'https://harness-api.x6.ai',
+      consoleOrigin: 'https://client-api.x6.ai',
+      pluginCatalogOrigin: 'https://client-api.x6.ai',
     },
   ],
   pinnedLine: '',

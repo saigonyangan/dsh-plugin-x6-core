@@ -1,6 +1,6 @@
 /** X6 official marketing site. */
 /** Production official site (x6 develop). */
-export declare const OFFICIAL_SITE: "https://x6-web.appexc.net";
+export declare const OFFICIAL_SITE: "https://x6.ai";
 /**
  * Official site base. Dual-line .ai/.io selection removed for single-domain deploy.
  */

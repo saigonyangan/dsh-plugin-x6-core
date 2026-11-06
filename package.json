@@ -1,7 +1,7 @@
 {
   "name": "@x6_ai/dsh-plugin-x6-core",
   "description": "X6 platform core: brand UI, OAuth quick setup, dual-line model provider, and app plugin market",
-  "version": "6.1.0",
+  "version": "1.2.0",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

@@ -9,7 +9,7 @@ X6 平台核心：品牌样式、OAuth 快速配置、双线路模型接入，�
 ## 安装
 
 ```bash
-dsh plugin --profile web add github:saigonyangan/dsh-plugin-x6-core#v6.1.0
+dsh plugin --profile web add github:saigonyangan/dsh-plugin-x6-core#v1.2.0
 ```
 
 安装后请**完全重启** `dsh web`（或 Desktop Host），并用打印的 `?token=` 地址打开。

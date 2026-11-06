@@ -14,29 +14,29 @@ const line31002: SupaLine = {
 const globalProd: SupaLine = {
   id: 'global',
   label: 'Global',
-  origin: 'https://x6-api.appexc.net',
-  harnessOrigin: 'https://x6-harness-api.appexc.net',
-  pluginCatalogOrigin: 'https://x6-console.appexc.net',
-  consoleOrigin: 'https://x6-console.appexc.net',
+  origin: 'https://api.x6.ai',
+  harnessOrigin: 'https://harness-api.x6.ai',
+  pluginCatalogOrigin: 'https://client-api.x6.ai',
+  consoleOrigin: 'https://client-api.x6.ai',
 }
 
 const cnProd: SupaLine = {
   id: 'cn',
   label: '中国大陆',
-  origin: 'https://x6-api.appexc.net',
-  harnessOrigin: 'https://x6-harness-api.appexc.net',
-  pluginCatalogOrigin: 'https://x6-console.appexc.net',
-  consoleOrigin: 'https://x6-console.appexc.net',
+  origin: 'https://api.x6.ai',
+  harnessOrigin: 'https://harness-api.x6.ai',
+  pluginCatalogOrigin: 'https://client-api.x6.ai',
+  consoleOrigin: 'https://client-api.x6.ai',
 }
 
 describe('resolvePluginCatalogOrigin', () => {
   it('prefers per-line pluginCatalogOrigin', () => {
     expect(resolvePluginCatalogOrigin({
       pluginCatalogOrigin: 'https://fallback.example.com',
-    }, globalProd)).toBe('https://x6-console.appexc.net')
+    }, globalProd)).toBe('https://client-api.x6.ai')
     expect(resolvePluginCatalogOrigin({
       pluginCatalogOrigin: '',
-    }, cnProd)).toBe('https://x6-console.appexc.net')
+    }, cnProd)).toBe('https://client-api.x6.ai')
   })
 
   it('uses top-level pluginCatalogOrigin when line omits it', () => {
@@ -64,9 +64,9 @@ describe('resolvePluginCatalogOrigin', () => {
 describe('resolveConsoleOrigin', () => {
   it('prefers per-line consoleOrigin', () => {
     expect(resolveConsoleOrigin({ consoleOrigin: 'https://fallback.example.com' }, globalProd))
-      .toBe('https://x6-console.appexc.net')
+      .toBe('https://client-api.x6.ai')
     expect(resolveConsoleOrigin({ consoleOrigin: '' }, cnProd))
-      .toBe('https://x6-console.appexc.net')
+      .toBe('https://client-api.x6.ai')
   })
 
   it('falls back to top-level consoleOrigin', () => {

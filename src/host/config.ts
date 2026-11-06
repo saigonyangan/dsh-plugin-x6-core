@@ -62,10 +62,10 @@ export const DEFAULT_LINES: SupaLine[] = [
   {
     id: 'default',
     label: 'X6',
-    origin: 'https://x6-api.appexc.net',
-    harnessOrigin: 'https://x6-harness-api.appexc.net',
-    pluginCatalogOrigin: 'https://x6-console.appexc.net',
-    consoleOrigin: 'https://x6-console.appexc.net',
+    origin: 'https://api.x6.ai',
+    harnessOrigin: 'https://harness-api.x6.ai',
+    pluginCatalogOrigin: 'https://client-api.x6.ai',
+    consoleOrigin: 'https://client-api.x6.ai',
   },
 ]
 
@@ -74,10 +74,10 @@ export const Config: z<Config> = z.object({
     {
       id: 'default',
       label: 'X6',
-      origin: 'https://x6-api.appexc.net',
-      harnessOrigin: 'https://x6-harness-api.appexc.net',
-      pluginCatalogOrigin: 'https://x6-console.appexc.net',
-      consoleOrigin: 'https://x6-console.appexc.net',
+      origin: 'https://api.x6.ai',
+      harnessOrigin: 'https://harness-api.x6.ai',
+      pluginCatalogOrigin: 'https://client-api.x6.ai',
+      consoleOrigin: 'https://client-api.x6.ai',
     },
   ]),
   forcePinnedLine: z.string().default(''),
