@@ -58,6 +58,11 @@ export declare function fetchWallet(line: SupaLine, accessToken: string, deviceI
 export declare function inputFromModalities(modalities: readonly string[] | undefined): readonly ('text' | 'image')[];
 /** List models from the data plane using the device API key. */
 export declare function listModels(line: SupaLine, apiKey: string): Promise<readonly ProviderModelEntry[]>;
+/**
+ * Validate an API key against the data plane and return models.
+ * Rejects unauthorized / unreachable keys instead of silently falling back.
+ */
+export declare function requireModelsForKey(line: SupaLine, apiKey: string): Promise<readonly ProviderModelEntry[]>;
 /** Minimal fallback when model discovery fails. */
 export declare const FALLBACK_MODELS: readonly ProviderModelEntry[];
 //# sourceMappingURL=harness-client.d.ts.map

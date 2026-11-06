@@ -4,13 +4,19 @@ import { randomUUID } from 'node:crypto'
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-client-connection'
 import type {} from '@deepseek-ai/dsh-host-webserver'
+import { credentialRef } from '@deepseek-ai/dsh-credentials'
 import {
+  AUTH_APPLY_KEY_PATH,
+  AUTH_START_PATH,
+  AUTH_STATUS_PATH,
   apiErr,
   apiOk,
+  type AuthApplyKeyResponse,
   type AuthStartResponse,
   type AuthStatusResponse,
 } from '../../shared/auth-contract.ts'
-import { OAUTH_CALLBACK_PATH } from '../../shared/provider.ts'
+import { dataPlaneBase } from '../../shared/line.ts'
+import { CREDENTIAL_REF, OAUTH_CALLBACK_PATH } from '../../shared/provider.ts'
 import type { Config } from '../config.ts'
 import { resolveAuthLine } from '../line/resolver.ts'
 import { ensureDeviceIdentity } from '../settings/device.ts'
@@ -19,7 +25,7 @@ import {
   generateState,
   generateVerifier,
 } from './pkce.ts'
-import { buildAuthorizeUrl } from './harness-client.ts'
+import { buildAuthorizeUrl, requireModelsForKey } from './harness-client.ts'
 import {
   createFlow,
   getFlow,
@@ -66,7 +72,7 @@ export function registerAuthRoutes(ctx: Context, config: Config): void {
     `http://127.0.0.1:${ctx.webServer.port}${OAUTH_CALLBACK_PATH}`
 
   ctx.effect(() => ctx.connection.fetch.register({
-    path: '/api/x6.auth.start',
+    path: AUTH_START_PATH,
     methods: ['GET'],
     requestBody: 'buffered',
     fetch: async (request) => {
@@ -96,9 +102,21 @@ export function registerAuthRoutes(ctx: Context, config: Config): void {
           authorizeUrl,
           ...(locale !== undefined ? { locale } : {}),
         })
+        // Prefer the console login page for clipboard copy when authorize redirects there.
+        let copyUrl: string | undefined
+        try {
+          const probe = await fetch(authorizeUrl, { method: 'GET', redirect: 'manual' })
+          const location = probe.headers.get('location')
+          if (location !== null && location.length > 0) {
+            copyUrl = new URL(location, authorizeUrl).href
+          }
+        } catch {
+          // keep authorizeUrl only
+        }
         const body = apiOk<AuthStartResponse>({
           flowId,
           authorizeUrl,
+          ...(copyUrl === undefined ? {} : { copyUrl }),
           line: winner.line,
           latencyMs: winner.latencyMs,
         })
@@ -111,7 +129,7 @@ export function registerAuthRoutes(ctx: Context, config: Config): void {
   }), 'x6: auth.start')
 
   ctx.effect(() => ctx.connection.fetch.register({
-    path: '/api/x6.auth.status',
+    path: AUTH_STATUS_PATH,
     methods: ['GET'],
     requestBody: 'buffered',
     fetch: async (request) => {
@@ -123,6 +141,35 @@ export function registerAuthRoutes(ctx: Context, config: Config): void {
       return jsonResponse(apiOk(flowStatus(flow)))
     },
   }), 'x6: auth.status')
+
+  ctx.effect(() => ctx.connection.fetch.register({
+    path: AUTH_APPLY_KEY_PATH,
+    methods: ['POST'],
+    requestBody: 'buffered',
+    fetch: async (request) => {
+      try {
+        const body = await request.json() as { apiKey?: unknown }
+        const apiKey = typeof body.apiKey === 'string' ? body.apiKey.trim() : ''
+        if (apiKey.length === 0) {
+          return jsonResponse(apiErr('请输入 API Key。'), 400)
+        }
+        const { winner } = await resolveAuthLine(ctx, config)
+        const models = await requireModelsForKey(winner.line, apiKey)
+        await ctx.credentials.set(credentialRef(CREDENTIAL_REF), apiKey)
+        const payload = apiOk<AuthApplyKeyResponse>({
+          baseURL: dataPlaneBase(winner.line),
+          models,
+          credentialRef: CREDENTIAL_REF,
+          line: winner.line,
+          latencyMs: winner.latencyMs,
+        })
+        return jsonResponse(payload)
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : '无法应用 API Key。'
+        return jsonResponse(apiErr(message), 400)
+      }
+    },
+  }), 'x6: auth.apply-key')
 
   ctx.effect(() => ctx.webServer.register({
     kind: 'exact',

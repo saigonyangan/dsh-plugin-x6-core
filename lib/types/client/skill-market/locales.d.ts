@@ -1,8 +1,8 @@
 /** Skill market copy keys. */
 export declare const skillMarketMessages: {
     readonly 'zh-CN': {
-        readonly nav: "应用插件";
-        readonly title: "应用插件";
+        readonly nav: "应用";
+        readonly title: "应用";
         readonly subtitle: "发现 DSH 插件：安装时按网络自动选择仓库。文档与主页见卡片底部。";
         readonly searchPlaceholder: "搜索插件…";
         readonly filterAll: "全部来源";
@@ -106,8 +106,8 @@ export declare const skillMarketMessages: {
         readonly toggleFailed: "开关失败";
     };
     readonly 'en-US': {
-        readonly nav: "App Plugins";
-        readonly title: "App Plugins";
+        readonly nav: "Apps";
+        readonly title: "Apps";
         readonly subtitle: "Discover DSH plugins: install picks a repository by network. Docs and homepage are in each card footer.";
         readonly searchPlaceholder: "Search plugins…";
         readonly filterAll: "All sources";

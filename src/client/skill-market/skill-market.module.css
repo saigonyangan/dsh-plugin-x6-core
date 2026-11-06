@@ -1,4 +1,16 @@
-/* Skill market sidebar trigger + modal panel. */
+/* Skill market main page + legacy modal chrome. */
+
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--dsw-alias-bg-layer-2);
+}
 
 .layer {
   position: relative;
@@ -92,15 +104,15 @@
 
 .title {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.3;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
 }
 
 .subtitle {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 20px;
   color: var(--dsw-alias-label-secondary);
 }
 
@@ -121,7 +133,7 @@
   color: var(--dsw-alias-label-primary);
   font-size: 13px;
   font-weight: 500;
-  line-height: 1;
+  line-height: 20px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -180,7 +192,8 @@
   color: var(--dsw-alias-label-secondary);
   font: inherit;
   font-size: 13px;
-  line-height: 1;
+  font-weight: 400;
+  line-height: 20px;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -201,7 +214,7 @@
   font: inherit;
   font-size: 13px;
   font-weight: 500;
-  line-height: 1;
+  line-height: 20px;
   cursor: pointer;
   box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
   transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
@@ -272,9 +285,9 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.3;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
   color: var(--dsw-alias-label-secondary);
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -297,14 +310,15 @@
   display: block;
   width: 100%;
   margin: 0;
-  padding: 9px 12px;
+  padding: 8px 12px;
   border: none;
   border-radius: 10px;
   background: transparent;
   color: var(--dsw-alias-label-secondary);
   font: inherit;
   font-size: 13px;
-  line-height: 1.35;
+  font-weight: 400;
+  line-height: 20px;
   text-align: left;
   cursor: pointer;
   appearance: none;
@@ -538,7 +552,7 @@
 .cardCodeList {
   margin: 0;
   font-size: 12px;
-  line-height: 1.35;
+  line-height: 18px;
   color: var(--dsw-alias-label-tertiary);
 }
 
@@ -609,6 +623,8 @@
   background: var(--dsw-alias-bg-layer-1);
   color: inherit;
   font: inherit;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .select {
@@ -619,6 +635,8 @@
   background: var(--dsw-alias-bg-layer-1);
   color: inherit;
   font: inherit;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .button {
@@ -629,7 +647,9 @@
   background: var(--dsw-alias-interactive-bg-accent);
   color: var(--dsw-alias-label-on-accent);
   font: inherit;
+  font-size: 13px;
   font-weight: 500;
+  line-height: 20px;
   cursor: pointer;
 }
 
@@ -641,7 +661,9 @@
   background: transparent;
   color: inherit;
   font: inherit;
+  font-size: 13px;
   font-weight: 500;
+  line-height: 20px;
   cursor: pointer;
 }
 
@@ -660,7 +682,7 @@
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 20px;
   background: rgb(196 30 58 / 8%);
   color: #c41e3a;
 }
@@ -670,16 +692,16 @@
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 20px;
   background: rgb(18 18 249 / 8%);
   color: var(--dsw-alias-label-primary);
 }
 
 .cardTitle {
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.35;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
 }
 
 .cardTitleRow {
@@ -707,9 +729,9 @@
   padding: 2px 8px;
   border-radius: 999px;
   border: 1px solid transparent;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 18px;
 }
 
 .badgeSourceX6 {
@@ -748,7 +770,8 @@
   background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10px;
+  font-size: 11px;
+  line-height: 16px;
 }
 
 .badgeDisabled {
@@ -776,6 +799,7 @@
 
 .toggleLabel {
   font-size: 12px;
+  line-height: 18px;
   color: var(--dsw-alias-label-secondary);
   user-select: none;
 }
@@ -848,9 +872,9 @@
   max-height: 7.75rem;
   overflow-x: hidden;
   overflow-y: auto;
-  font-size: 12px;
-  line-height: 1.55;
-  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   scrollbar-width: thin;
@@ -862,9 +886,9 @@
   max-height: 6rem;
   overflow-x: hidden;
   overflow-y: auto;
-  font-size: 12px;
-  line-height: 1.55;
-  color: var(--dsw-alias-label-secondary);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   scrollbar-width: thin;
@@ -873,7 +897,7 @@
 .cardCode {
   margin: 4px 0 0;
   font-size: 12px;
-  line-height: 1.35;
+  line-height: 18px;
   color: var(--dsw-alias-label-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -891,6 +915,7 @@
   font: inherit;
   font-size: 12px;
   font-weight: 500;
+  line-height: 18px;
   cursor: pointer;
 }
 
@@ -910,6 +935,7 @@
   font: inherit;
   font-size: 12px;
   font-weight: 500;
+  line-height: 18px;
   cursor: pointer;
 }
 
@@ -926,8 +952,9 @@
   background: rgb(196 30 58 / 10%);
   color: #c41e3a;
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
+  line-height: 20px;
   cursor: pointer;
 }
 
@@ -947,7 +974,7 @@
   background: transparent;
   color: inherit;
   font-size: 12px;
-  line-height: 1;
+  line-height: 18px;
   white-space: nowrap;
   text-decoration: none;
 }
@@ -967,7 +994,7 @@
   background: transparent;
   color: inherit;
   font-size: 12px;
-  line-height: 1;
+  line-height: 18px;
   white-space: nowrap;
   text-decoration: none;
 }
@@ -981,8 +1008,9 @@
   margin: 0;
   padding: 24px 0;
   text-align: center;
-  color: var(--dsw-alias-label-secondary);
-  font-size: 14px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  line-height: 20px;
 }
 
 .footer {
@@ -1018,9 +1046,9 @@
 
 .installDialogTitle {
   margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.35;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
 }
 
 .installSummary {
@@ -1031,6 +1059,7 @@
   border-radius: 10px;
   background: var(--dsw-alias-bg-layer-1);
   font-size: 13px;
+  line-height: 20px;
 }
 
 .installSummary > div {
@@ -1055,7 +1084,7 @@
 .installDialogStatus {
   margin: 0;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 20px;
   color: var(--dsw-alias-label-secondary);
 }
 
@@ -1100,7 +1129,7 @@
 .installDialogHint {
   margin: 0;
   font-size: 12px;
-  line-height: 1.45;
+  line-height: 18px;
   color: var(--dsw-alias-label-tertiary);
 }
 
@@ -1130,14 +1159,14 @@
 .confirmDialogTitle {
   margin: 0;
   font-size: 16px;
-  font-weight: 600;
-  line-height: 1.35;
+  font-weight: 500;
+  line-height: 24px;
 }
 
 .confirmDialogMessage {
   margin: 0;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 20px;
   color: var(--dsw-alias-label-secondary);
 }
 

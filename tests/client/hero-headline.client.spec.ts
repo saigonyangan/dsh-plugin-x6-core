@@ -7,8 +7,15 @@ describe('patchHeroHeadlines', () => {
     const root = document.createElement('div')
     root.innerHTML = '<span>探索未至之境</span><span>Into the Unknown</span>'
     patchHeroHeadlines(root)
-    expect(root.textContent).toContain('为你打造专属Agent生态应用')
-    expect(root.textContent).toContain('Building your exclusive Agent ecosystem application')
+    expect(root.textContent).toContain('为你打造专属插件生态应用')
+    expect(root.textContent).toContain('Building your exclusive plugin ecosystem application')
+  })
+
+  it('migrates prior Agent headline copy to 插件', () => {
+    const root = document.createElement('div')
+    root.innerHTML = '<span>为你打造专属Agent生态应用</span>'
+    patchHeroHeadlines(root)
+    expect(root.textContent).toContain('为你打造专属插件生态应用')
   })
 })
 

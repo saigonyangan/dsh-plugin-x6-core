@@ -1,11 +1,22 @@
-/** Official hero headlines replaced by X6 copy until `conversation.hero.headline` slot ships. */
+/** Official → X6 hero headlines (also used to restore on clear). */
+const OFFICIAL_HEADLINE_REPLACEMENTS = new Map([
+  ['探索未至之境', '为你打造专属插件生态应用'],
+  ['Into the Unknown', 'Building your exclusive plugin ecosystem application'],
+])
+
+/** Extra one-way swaps (prior X6 wording → current); not reversed on clear. */
+const HEADLINE_MIGRATIONS = new Map([
+  ['为你打造专属Agent生态应用', '为你打造专属插件生态应用'],
+  ['Building your exclusive Agent ecosystem application', 'Building your exclusive plugin ecosystem application'],
+])
+
 const HEADLINE_REPLACEMENTS = new Map([
-  ['探索未至之境', '为你打造专属Agent生态应用'],
-  ['Into the Unknown', 'Building your exclusive Agent ecosystem application'],
+  ...OFFICIAL_HEADLINE_REPLACEMENTS,
+  ...HEADLINE_MIGRATIONS,
 ])
 
 const HEADLINE_REVERSALS = new Map(
-  [...HEADLINE_REPLACEMENTS].map(([from, to]) => [to, from] as const),
+  [...OFFICIAL_HEADLINE_REPLACEMENTS].map(([from, to]) => [to, from] as const),
 )
 
 /** Hero preview badge copy shipped by ui-conversation. */

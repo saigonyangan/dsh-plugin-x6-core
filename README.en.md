@@ -9,7 +9,7 @@ Repo: [GitHub](https://github.com/saigonyangan/dsh-plugin-x6-core)
 ## Install
 
 ```bash
-dsh plugin --profile web add github:saigonyangan/dsh-plugin-x6-core#v6.0.0
+dsh plugin --profile web add github:saigonyangan/dsh-plugin-x6-core#v6.1.0
 ```
 
 Fully restart `dsh web` (or Desktop Host) after install, then open the printed `?token=` URL.

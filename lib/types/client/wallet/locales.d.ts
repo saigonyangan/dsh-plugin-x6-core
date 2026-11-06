@@ -1,11 +1,11 @@
 /** Wallet sidebar locale dictionary. */
 declare const zh: {
-    readonly nav: "余额";
+    readonly nav: "用户余额";
     readonly title: "X6 余额";
     readonly close: "关闭";
     readonly tabAccount: "账户";
     readonly tabSubscription: "订阅";
-    readonly balanceLabel: "可用余额";
+    readonly balanceLabel: "账户余额";
     readonly pointsLabel: "剩余积分";
     readonly pointsGrantedLabel: "本周期额度";
     readonly orgLabel: "组织";
@@ -14,7 +14,6 @@ declare const zh: {
     readonly refresh: "刷新";
     readonly loading: "正在加载余额…";
     readonly configureBudget: "配置预算";
-    readonly visibilityHint: "仅当前模型服务商为 X6 时显示。";
     readonly budgetHint: "配额预算请登录到控制台中进行配置";
     readonly reauthHint: "会话已失效。请打开设置 → 模型，重新执行 X6 快速配置。";
     readonly keyMismatchHint: "API Key 已变更，请打开设置 → 模型，重新执行 X6 快速配置。";

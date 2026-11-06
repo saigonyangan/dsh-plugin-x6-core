@@ -4,7 +4,6 @@ import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { X6UiSettings } from '../../shared/settings-contract.ts'
 import { SkillMarketRoot } from '../skill-market/SkillMarketRoot.tsx'
-import { WalletRoot } from '../wallet/WalletRoot.tsx'
 import { FooterErrorBoundary } from './FooterErrorBoundary.tsx'
 import css from './sidebar-footer.module.css'
 
@@ -13,17 +12,11 @@ export interface SidebarFooterRootProps extends PropsRuntime<'sidebar.footer.act
   readonly settings: ConfigForm<X6UiSettings>
 }
 
-/**
- * One footer occupant stacking wallet + skill market vertically.
- * Official `.footerActions` is a row flex; two separate registrants sit side-by-side and squeeze each other.
- */
+/** Sidebar footer occupant for skill market (wallet lives in Settings). */
 export function SidebarFooterRoot(props: SidebarFooterRootProps) {
   const { settings, ...rest } = props
   return (
     <div className={css.stack}>
-      <FooterErrorBoundary label="wallet">
-        <WalletRoot {...rest} settings={settings} />
-      </FooterErrorBoundary>
       <FooterErrorBoundary label="skill-market">
         <SkillMarketRoot {...rest} settings={settings} />
       </FooterErrorBoundary>

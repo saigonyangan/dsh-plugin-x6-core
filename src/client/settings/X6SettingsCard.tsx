@@ -6,7 +6,6 @@ import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots
 import {
   PINNED_LINE_FIELD,
   SHOW_BRAND_FIELD,
-  SHOW_WALLET_FIELD,
   type X6UiSettings,
 } from '../../shared/settings-contract.ts'
 import type { LineStatusRow } from '../../shared/line-contract.ts'
@@ -17,7 +16,6 @@ import {
   readActiveLineId,
   useSettingsWritable,
   useShowBrandPref,
-  useShowWalletPref,
 } from './useShowWalletPref.ts'
 import css from './settings-card.module.css'
 
@@ -36,7 +34,6 @@ export function X6SettingsCard(props: X6SettingsCardProps) {
   const { ctx, scope, view, t: slotT } = props
   const locale = useClientLocale(ctx)
   const t = settingsCardT(locale)
-  const showWallet = useShowWalletPref(scope)
   const showBrand = useShowBrandPref(scope)
   const { available, writable } = useSettingsWritable(scope)
   const [saving, setSaving] = useState(false)
@@ -135,19 +132,6 @@ export function X6SettingsCard(props: X6SettingsCardProps) {
               ? t('regionLoading')
               : t('regionHint')}
         </p>
-      </div>
-      <div className={css.field}>
-        <label className={writable ? css.row : `${css.row} ${css.rowDisabled}`}>
-          <input
-            className={css.checkbox}
-            type="checkbox"
-            checked={showWallet}
-            disabled={!writable || saving}
-            onChange={(event) => { void onToggle(SHOW_WALLET_FIELD, event.target.checked) }}
-          />
-          <span>{t('showWallet')}</span>
-        </label>
-        <p className={css.hint}>{t('showWalletHint')}</p>
       </div>
       <div className={css.field}>
         <label className={writable ? css.row : `${css.row} ${css.rowDisabled}`}>

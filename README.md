@@ -9,7 +9,7 @@ X6 平台核心：品牌样式、OAuth 快速配置、双线路模型接入，�
 ## 安装
 
 ```bash
-dsh plugin --profile web add github:saigonyangan/dsh-plugin-x6-core#v6.0.0
+dsh plugin --profile web add github:saigonyangan/dsh-plugin-x6-core#v6.1.0
 ```
 
 安装后请**完全重启** `dsh web`（或 Desktop Host），并用打印的 `?token=` 地址打开。
@@ -17,6 +17,7 @@ dsh plugin --profile web add github:saigonyangan/dsh-plugin-x6-core#v6.0.0
 ## 能做什么
 
 - **品牌**：侧栏 Logo/名称、对话区标识与浏览器标签页切换为 X6 样式（可在设置中关闭）
+- **首次登录**：占用官方 `settings.models.sign-in`（priority -1），把 DeepSeek / Account 登录窗换成 **X6 OAuth**（「稍后」可跳过）
 - **快速配置**：设置 → 模型页底部一键授权；按插件配置「访问区域」钉死 Global / 中国大陆线路（首次自动选最快）
 - **访问区域**：插件配置内可切换全球 / 中国大陆；授权、控制台、余额跟区域线；插件市场下载仍独立按网络探测
 - **应用插件**：侧栏「应用插件」浏览、安装、升级、卸载社区与运营插件

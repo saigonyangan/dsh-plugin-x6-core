@@ -3,11 +3,15 @@ export type QuickSetupPhase = 'idle' | 'starting' | 'awaiting-approval' | 'writi
 export interface UseQuickSetupOptions {
     readonly ctx: ClientContext;
     readonly locale: string | undefined;
+    /** Called after provider write succeeds (e.g. dismiss onboarding). */
+    readonly onDone?: () => void;
 }
 export interface QuickSetupState {
     readonly phase: QuickSetupPhase;
     readonly flowId: string | undefined;
     readonly authorizeUrl: string | undefined;
+    /** Prefer for clipboard; falls back to authorizeUrl. */
+    readonly copyUrl: string | undefined;
     readonly message: string | undefined;
     readonly start: () => Promise<void>;
     readonly reopenAuth: () => void;

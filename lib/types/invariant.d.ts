@@ -1,16 +1,12 @@
 /**
  * Package-owned invariant companion for `@x6_ai/dsh-plugin-x6-core`.
+ * dsh 0.2.1 起官方已移除 `@deepseek-ai/dsh-invariants`；保留空 companion 以免旧引用断裂。
  * @module @x6_ai/dsh-plugin-x6-core/invariant
  */
-import type { Context } from '@deepseek-ai/cordis';
 /** Cordis companion plugin name. */
 export declare const name = "x6-core-invariant";
-/** Service required before the companion can reserve package ownership. */
-export declare const inject: string[];
-/**
- * Register this package's invariant companion.
- * @param ctx - Cordis context carrying the invariant service.
- * @returns the installed registration's disposer after setup succeeds.
- */
-export declare const apply: (ctx: Context) => Promise<() => void>;
+/** No services required. */
+export declare const inject: readonly [];
+/** No-op: package retains no mutable host state needing invariant checks. */
+export declare function apply(): void;
 //# sourceMappingURL=invariant.d.ts.map

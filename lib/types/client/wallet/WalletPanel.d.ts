@@ -3,7 +3,9 @@ export interface WalletPanelProps {
     readonly locale: string | undefined;
     readonly onClose: () => void;
     readonly onBalanceChange?: (balance: WalletBalanceResponse | undefined) => void;
+    /** Settings page embed: no modal chrome / dialog role. */
+    readonly embedded?: boolean;
 }
-/** Compact modal: account / subscription tabs + console budget deep link. */
-export declare function WalletPanel({ locale, onClose, onBalanceChange }: WalletPanelProps): import("react").JSX.Element;
+/** Org-first wallet layout: primary org, then balance / points cards. */
+export declare function WalletPanel({ locale, onClose, onBalanceChange, embedded }: WalletPanelProps): import("react").JSX.Element;
 //# sourceMappingURL=WalletPanel.d.ts.map

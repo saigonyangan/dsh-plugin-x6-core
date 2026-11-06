@@ -11,11 +11,18 @@ export interface SkillMarketPanelProps {
   readonly onClose: () => void
   /** Resolved X6 official site (.ai / .io + locale). */
   readonly officialSiteUrl: string
+  /** Main-panel embed: fill the frame instead of floating as a modal. */
+  readonly embedded?: boolean
 }
 
 const DSH_PLUGIN_GITHUB_TOPIC_URL = 'https://github.com/topics/dsh-plugin'
 
-export function SkillMarketPanel({ state, onClose, officialSiteUrl }: SkillMarketPanelProps) {
+export function SkillMarketPanel({
+  state,
+  onClose,
+  officialSiteUrl,
+  embedded = false,
+}: SkillMarketPanelProps) {
   const {
     t,
     loading,
@@ -56,7 +63,12 @@ export function SkillMarketPanel({ state, onClose, officialSiteUrl }: SkillMarke
   const emptyMessage = installTab === 'installed' ? t('emptyInstalled') : t('emptyNotInstalled')
 
   return (
-    <div className={css.panel} role="dialog" aria-modal="true" aria-labelledby="skill-market-title">
+    <div
+      className={embedded ? css.page : css.panel}
+      role={embedded ? 'region' : 'dialog'}
+      {...(embedded ? {} : { 'aria-modal': true as const })}
+      aria-labelledby="skill-market-title"
+    >
       <header className={css.header}>
         <div className={css.titleBlock}>
           <h2 className={css.title} id="skill-market-title">{t('title')}</h2>
@@ -79,9 +91,11 @@ export function SkillMarketPanel({ state, onClose, officialSiteUrl }: SkillMarke
           >
             {t('githubPlugins')}
           </a>
-          <button type="button" className={css.closeButton} aria-label={t('close')} onClick={onClose}>
-            ×
-          </button>
+          {embedded ? null : (
+            <button type="button" className={css.closeButton} aria-label={t('close')} onClick={onClose}>
+              ×
+            </button>
+          )}
         </div>
       </header>
       <div className={css.body}>

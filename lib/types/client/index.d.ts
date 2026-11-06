@@ -1,4 +1,4 @@
-/** X6 client plugin: brand, hero, and quick-setup features. */
+/** X6 client plugin: brand, hero, sign-in, and settings features. */
 import type { Context as ClientContext } from '@deepseek-ai/cordis';
 /** Required client services. */
 export declare const inject: string[];

@@ -1,25 +1,22 @@
-/** Wallet sidebar entry + modal. */
+/** Register X6 wallet as a settings section (no sidebar entry). */
 
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
-import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'
-import type {} from '@deepseek-ai/dsh-api-remotes/client'
-import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
-import type { X6UiSettings } from '../../shared/settings-contract.ts'
-import { WalletRoot } from './WalletRoot.tsx'
+import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+import { watchSettingsWalletNavIcon } from './patchSettingsNavIcon.ts'
+import { WalletSettingsSection } from './WalletSettingsSection.tsx'
 import { walletT } from './locales.ts'
 
-/**
- * Register the sidebar footer wallet action alone.
- * Prefer {@link registerSidebarFooter} which stacks wallet + skill market.
- */
-export function registerWallet(
-  ctx: ClientContext,
-  settings: ConfigForm<X6UiSettings>,
-): void {
-  ctx.slots.inject('sidebar.footer.action', () => ctx.slots.register({
-    name: 'sidebar.footer.action',
+/** Register「用户余额」under Settings → sections. */
+export function registerWallet(ctx: ClientContext): void {
+  ctx.slots.inject('settings.section', () => ctx.slots.register({
+    name: 'settings.section',
     id: 'x6-wallet',
-    order: -10,
+    order: -20,
     label: () => walletT(ctx.locale.getSnapshot().active)('nav'),
-  }, (props) => <WalletRoot ctx={ctx} settings={settings} {...props} />))
+  }, (owner) => (
+    <WalletSettingsSection ctx={ctx} close={owner.close} />
+  )))
+
+  // SettingsRoot hard-codes nav glyphs by id; patch wallet row without touching engine.
+  ctx.effect(() => watchSettingsWalletNavIcon(), 'x6-core: wallet-nav-icon')
 }

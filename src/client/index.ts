@@ -1,4 +1,4 @@
-/** X6 client plugin: brand, hero, and quick-setup features. */
+/** X6 client plugin: brand, hero, sign-in, and settings features. */
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -14,8 +14,9 @@ import {
 import { registerBrand } from './brand/index.tsx'
 import { registerHero } from './hero/index.ts'
 import { registerPluginSettings } from './settings/index.tsx'
-import { registerQuickSetup } from './quick-setup/index.tsx'
-import { registerSidebarFooter } from './sidebar-footer/index.tsx'
+import { registerSignIn } from './sign-in/index.tsx'
+import { registerSkillMarket } from './skill-market/index.tsx'
+import { registerWallet } from './wallet/index.tsx'
 
 /** Required client services. */
 export const inject = [
@@ -26,6 +27,7 @@ export const inject = [
   'locale',
   'connection',
   'configForms',
+  'layout',
 ]
 
 /**
@@ -36,7 +38,8 @@ export function apply(ctx: ClientContext): void {
   const settings = ctx.configForms.get<X6UiSettings>(X6_SETTINGS_NS)
   registerBrand(ctx, settings)
   registerHero(ctx, settings)
-  registerQuickSetup(ctx)
+  registerSignIn(ctx)
+  registerWallet(ctx)
+  registerSkillMarket(ctx, settings)
   registerPluginSettings(ctx, settings)
-  registerSidebarFooter(ctx, settings)
 }

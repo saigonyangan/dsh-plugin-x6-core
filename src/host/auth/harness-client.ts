@@ -257,18 +257,7 @@ export function inputFromModalities(
   return hasImage ? ['text', 'image'] : ['text']
 }
 
-/** List models from the data plane using the device API key. */
-export async function listModels(
-  line: SupaLine,
-  apiKey: string,
-): Promise<readonly ProviderModelEntry[]> {
-  const base = dataPlaneBase(line)
-  const response = await fetch(`${base}/models`, {
-    headers: { Authorization: `Bearer ${apiKey}` },
-  })
-  if (!response.ok) return FALLBACK_MODELS
-  const payload = await response.json() as { data?: UpstreamModelRow[] }
-  const models = payload.data ?? []
+function mapUpstreamModels(models: readonly UpstreamModelRow[]): readonly ProviderModelEntry[] {
   if (models.length === 0) return FALLBACK_MODELS
   return models.map(model => {
     const efforts = reasoningEffortsForModel(model.id, model.supported_parameters)
@@ -282,6 +271,42 @@ export async function listModels(
       ...efforts === undefined ? {} : { reasoningEfforts: { ...efforts } },
     }
   })
+}
+
+/** List models from the data plane using the device API key. */
+export async function listModels(
+  line: SupaLine,
+  apiKey: string,
+): Promise<readonly ProviderModelEntry[]> {
+  const base = dataPlaneBase(line)
+  const response = await fetch(`${base}/models`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  })
+  if (!response.ok) return FALLBACK_MODELS
+  const payload = await response.json() as { data?: UpstreamModelRow[] }
+  return mapUpstreamModels(payload.data ?? [])
+}
+
+/**
+ * Validate an API key against the data plane and return models.
+ * Rejects unauthorized / unreachable keys instead of silently falling back.
+ */
+export async function requireModelsForKey(
+  line: SupaLine,
+  apiKey: string,
+): Promise<readonly ProviderModelEntry[]> {
+  const base = dataPlaneBase(line)
+  const response = await fetch(`${base}/models`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  })
+  if (response.status === 401 || response.status === 403) {
+    throw new Error('API Key 无效或已过期。')
+  }
+  if (!response.ok) {
+    throw new Error(`无法校验 API Key（HTTP ${String(response.status)}）。`)
+  }
+  const payload = await response.json() as { data?: UpstreamModelRow[] }
+  return mapUpstreamModels(payload.data ?? [])
 }
 
 /** Minimal fallback when model discovery fails. */

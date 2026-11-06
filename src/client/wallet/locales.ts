@@ -1,12 +1,12 @@
 /** Wallet sidebar locale dictionary. */
 
 const zh = {
-  nav: '余额',
+  nav: '用户余额',
   title: 'X6 余额',
   close: '关闭',
   tabAccount: '账户',
   tabSubscription: '订阅',
-  balanceLabel: '可用余额',
+  balanceLabel: '账户余额',
   pointsLabel: '剩余积分',
   pointsGrantedLabel: '本周期额度',
   orgLabel: '组织',
@@ -15,7 +15,6 @@ const zh = {
   refresh: '刷新',
   loading: '正在加载余额…',
   configureBudget: '配置预算',
-  visibilityHint: '仅当前模型服务商为 X6 时显示。',
   budgetHint: '配额预算请登录到控制台中进行配置',
   reauthHint: '会话已失效。请打开设置 → 模型，重新执行 X6 快速配置。',
   keyMismatchHint: 'API Key 已变更，请打开设置 → 模型，重新执行 X6 快速配置。',
@@ -26,12 +25,12 @@ const zh = {
 } as const
 
 const en = {
-  nav: 'Balance',
+  nav: 'User balance',
   title: 'X6 balance',
   close: 'Close',
   tabAccount: 'Account',
   tabSubscription: 'Subscription',
-  balanceLabel: 'Available balance',
+  balanceLabel: 'Account balance',
   pointsLabel: 'Points remaining',
   pointsGrantedLabel: 'Period grant',
   orgLabel: 'Organization',
@@ -40,7 +39,6 @@ const en = {
   refresh: 'Refresh',
   loading: 'Loading balance…',
   configureBudget: 'Configure budget',
-  visibilityHint: 'Shown only when the current model provider is X6.',
   budgetHint: 'Sign in to the console to configure quota budgets.',
   reauthHint: 'Session expired. Open Settings → Models and run X6 Quick Setup again.',
   keyMismatchHint: 'API key changed. Open Settings → Models and run X6 Quick Setup again.',

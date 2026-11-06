@@ -11,7 +11,6 @@
   "references": [
     { "path": "../../../../engine/vendor/cordis" },
     { "path": "../../../../engine/vendor/schemastery" },
-    { "path": "../../../../engine/packages/runtime-diagnostics/invariants" },
     { "path": "../../../../engine/packages/api/remotes/tsconfig.client.json" },
     { "path": "../../../../engine/packages/client/connection/tsconfig.host.json" },
     { "path": "../../../../engine/packages/credentials/credentials" },

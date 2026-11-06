@@ -6,9 +6,6 @@ export interface SidebarFooterRootProps extends PropsRuntime<'sidebar.footer.act
     readonly ctx: ClientContext;
     readonly settings: ConfigForm<X6UiSettings>;
 }
-/**
- * One footer occupant stacking wallet + skill market vertically.
- * Official `.footerActions` is a row flex; two separate registrants sit side-by-side and squeeze each other.
- */
+/** Sidebar footer occupant for skill market (wallet lives in Settings). */
 export declare function SidebarFooterRoot(props: SidebarFooterRootProps): import("react").JSX.Element;
 //# sourceMappingURL=SidebarFooterRoot.d.ts.map

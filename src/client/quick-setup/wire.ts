@@ -1,8 +1,10 @@
 /** Browser fetch wrappers for X6 host API routes. */
 
 import {
+  AUTH_APPLY_KEY_PATH,
   AUTH_START_PATH,
   AUTH_STATUS_PATH,
+  type AuthApplyKeyResponse,
   type AuthStartResponse,
   type AuthStatusResponse,
 } from '../../shared/auth-contract.ts'
@@ -13,6 +15,7 @@ interface OkBody {
 
 type StartBody = AuthStartResponse & OkBody
 type StatusBody = AuthStatusResponse & OkBody
+type ApplyKeyBody = AuthApplyKeyResponse & OkBody
 
 async function readResponseBody(response: Response): Promise<unknown> {
   const contentType = response.headers.get('content-type') ?? ''
@@ -60,4 +63,14 @@ export async function fetchAuthStatus(flowId: string): Promise<AuthStatusRespons
   url.searchParams.set('flowId', flowId)
   const response = await fetch(url)
   return parseJson<StatusBody>(response)
+}
+
+/** Store a pasted X6 API key on Host and return provider write material. */
+export async function applyApiKey(apiKey: string): Promise<AuthApplyKeyResponse> {
+  const response = await fetch(new URL(AUTH_APPLY_KEY_PATH, window.location.origin), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey }),
+  })
+  return parseJson<ApplyKeyBody>(response)
 }

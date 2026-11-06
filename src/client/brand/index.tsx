@@ -4,7 +4,7 @@ import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client'
 import type { X6UiSettings } from '../../shared/settings-contract.ts'
 import { readShowBrand } from '../settings/useShowWalletPref.ts'
-import { X6BrandMark, X6BrandNameSlot } from './Brand.tsx'
+import { X6BrandMark, X6BrandName } from './Brand.tsx'
 import { clearTabBranding, watchTabBrandingPatches } from './patchShellBranding.ts'
 
 /**
@@ -43,7 +43,7 @@ export function registerBrand(
               name: 'sidebar.brand.name',
               priority: -1,
               registrant: '@x6_ai/dsh-plugin-x6-core',
-            }, () => <X6BrandNameSlot ctx={ctx} />)
+            }, () => <X6BrandName />)
             yield ctx.slots.register({
               name: 'conversation.hero.brand.mark',
               priority: -1,

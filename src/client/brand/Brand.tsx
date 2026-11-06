@@ -1,16 +1,9 @@
-import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { HeroBrandMarkOwnerProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { SidebarBrandMarkOwnerProps } from '@deepseek-ai/dsh-client-ui-sidebar/client'
-import { useClientLocale } from '../use-client-locale.ts'
 import css from './brand.module.css'
-import { brandT } from './locales.ts'
 import { X6_LOGO_MARK_DATA_URL } from './logo-data.ts'
 
 type X6BrandMarkProps = HeroBrandMarkOwnerProps & SidebarBrandMarkOwnerProps
-
-export interface X6BrandNameProps {
-  readonly locale: string | undefined
-}
 
 /**
  * Render the X6 mark with the presentation requested by its host surface.
@@ -32,24 +25,15 @@ export function X6BrandMark({ size, className }: X6BrandMarkProps) {
 }
 
 /**
- * Render the X6 wordmark and console subtitle without its slotted mark.
- * @returns the X6 brand name stack.
+ * Render the X6 Harness wordmark without a subtitle row.
+ * @returns the vertically centered brand name.
  */
-export function X6BrandName({ locale }: X6BrandNameProps) {
-  const t = brandT(locale)
+export function X6BrandName() {
   return (
     <div className={css.brandNameStack}>
-      <span className={css.wordmark} aria-label="X6">
-        X6
-      </span>
-      <span className={css.subtitle}>
-        {t('subtitle')}
+      <span className={css.wordmark} aria-label="X6 Harness">
+        X6 Harness
       </span>
     </div>
   )
-}
-
-export function X6BrandNameSlot({ ctx }: { readonly ctx: ClientContext }) {
-  const locale = useClientLocale(ctx)
-  return <X6BrandName locale={locale} />
 }

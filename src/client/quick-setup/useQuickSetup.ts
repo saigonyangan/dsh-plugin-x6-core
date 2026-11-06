@@ -33,12 +33,16 @@ const MAX_POLL_MS = 600_000
 export interface UseQuickSetupOptions {
   readonly ctx: ClientContext
   readonly locale: string | undefined
+  /** Called after provider write succeeds (e.g. dismiss onboarding). */
+  readonly onDone?: () => void
 }
 
 export interface QuickSetupState {
   readonly phase: QuickSetupPhase
   readonly flowId: string | undefined
   readonly authorizeUrl: string | undefined
+  /** Prefer for clipboard; falls back to authorizeUrl. */
+  readonly copyUrl: string | undefined
   readonly message: string | undefined
   readonly start: () => Promise<void>
   readonly reopenAuth: () => void
@@ -46,10 +50,11 @@ export interface QuickSetupState {
 
 /** Quick-setup state machine: authorize → poll → write provider (auth line resolved on host). */
 export function useQuickSetup(options: UseQuickSetupOptions): QuickSetupState {
-  const { ctx, locale } = options
+  const { ctx, locale, onDone } = options
   const [phase, setPhase] = useState<QuickSetupPhase>('idle')
   const [flowId, setFlowId] = useState<string | undefined>()
   const [authorizeUrl, setAuthorizeUrl] = useState<string | undefined>()
+  const [copyUrl, setCopyUrl] = useState<string | undefined>()
   const [message, setMessage] = useState<string | undefined>()
   const pollStartedAt = useRef<number | undefined>()
   const pollTimer = useRef<ReturnType<typeof setTimeout> | undefined>()
@@ -74,7 +79,8 @@ export function useQuickSetup(options: UseQuickSetupOptions): QuickSetupState {
     })
     setPhase('done')
     setMessage(quickSetupT(locale)('done'))
-  }, [ctx.remote.settings, locale])
+    onDone?.()
+  }, [ctx.remote.settings, locale, onDone])
 
   const schedulePoll = useCallback((id: string) => {
     clearPoll()
@@ -116,6 +122,7 @@ export function useQuickSetup(options: UseQuickSetupOptions): QuickSetupState {
       const started = await startAuth(locale)
       setFlowId(started.flowId)
       setAuthorizeUrl(started.authorizeUrl)
+      setCopyUrl(started.copyUrl ?? started.authorizeUrl)
       setPhase('awaiting-approval')
       window.open(started.authorizeUrl, '_blank', 'noopener,noreferrer')
       schedulePoll(started.flowId)
@@ -135,6 +142,7 @@ export function useQuickSetup(options: UseQuickSetupOptions): QuickSetupState {
     phase,
     flowId,
     authorizeUrl,
+    copyUrl,
     message,
     start,
     reopenAuth,

@@ -1,10 +1,5 @@
-/** Wallet sidebar entry + modal. */
+/** Register X6 wallet as a settings section (no sidebar entry). */
 import type { Context as ClientContext } from '@deepseek-ai/cordis';
-import type { ConfigForm } from '@deepseek-ai/dsh-client-ui-settings/client';
-import type { X6UiSettings } from '../../shared/settings-contract.ts';
-/**
- * Register the sidebar footer wallet action alone.
- * Prefer {@link registerSidebarFooter} which stacks wallet + skill market.
- */
-export declare function registerWallet(ctx: ClientContext, settings: ConfigForm<X6UiSettings>): void;
+/** Register「用户余额」under Settings → sections. */
+export declare function registerWallet(ctx: ClientContext): void;
 //# sourceMappingURL=index.d.ts.map

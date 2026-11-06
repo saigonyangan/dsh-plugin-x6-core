@@ -1,58 +1,101 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   WALLET_ERROR,
   WALLET_POLL_MS,
   type WalletBalanceResponse,
 } from '../../shared/wallet-contract.ts'
+import { loadWalletSnapshot, peekWalletCache, type WalletSnapshot } from './cache.ts'
 import {
   formatPointsRemaining,
   formatWalletAmount,
   formatWalletUnixDate,
 } from './format.ts'
 import { walletT } from './locales.ts'
-import { fetchWalletBalance, fetchWalletStatus } from './wire.ts'
 import css from './wallet.module.css'
 
 export interface WalletPanelProps {
   readonly locale: string | undefined
   readonly onClose: () => void
   readonly onBalanceChange?: (balance: WalletBalanceResponse | undefined) => void
+  /** Settings page embed: no modal chrome / dialog role. */
+  readonly embedded?: boolean
 }
 
-type WalletTab = 'account' | 'subscription'
+function applySnapshot(
+  snapshot: WalletSnapshot,
+  dict: ReturnType<typeof walletT>,
+  setData: (v: WalletBalanceResponse | undefined) => void,
+  setUsagePoliciesUrl: (v: string | undefined) => void,
+  setCredentialMismatch: (v: boolean) => void,
+  setError: (v: string | undefined) => void,
+  onBalanceChange: ((balance: WalletBalanceResponse | undefined) => void) | undefined,
+): void {
+  setUsagePoliciesUrl(snapshot.status.usagePoliciesUrl)
+  if (snapshot.kind === 'mismatch') {
+    setData(undefined)
+    setCredentialMismatch(true)
+    setError(dict('keyMismatchHint'))
+    onBalanceChange?.(undefined)
+    return
+  }
+  setCredentialMismatch(false)
+  setData(snapshot.balance)
+  setUsagePoliciesUrl(snapshot.balance.usagePoliciesUrl)
+  setError(undefined)
+  onBalanceChange?.(snapshot.balance)
+}
 
-/** Compact modal: account / subscription tabs + console budget deep link. */
-export function WalletPanel({ locale, onClose, onBalanceChange }: WalletPanelProps) {
+/** Org-first wallet layout: primary org, then balance / points cards. */
+export function WalletPanel({ locale, onClose, onBalanceChange, embedded = false }: WalletPanelProps) {
   const t = walletT(locale)
-  const tabListId = useId()
-  const [tab, setTab] = useState<WalletTab>('account')
-  const [loading, setLoading] = useState(true)
-  const [data, setData] = useState<WalletBalanceResponse | undefined>()
-  const [error, setError] = useState<string | undefined>()
+  const cached = peekWalletCache(locale)
+  const [loading, setLoading] = useState(cached === undefined)
+  const [data, setData] = useState<WalletBalanceResponse | undefined>(
+    cached?.kind === 'ok' ? cached.balance : undefined,
+  )
+  const [error, setError] = useState<string | undefined>(
+    cached?.kind === 'mismatch' ? t('keyMismatchHint') : undefined,
+  )
   const [sessionRevoked, setSessionRevoked] = useState(false)
-  const [credentialMismatch, setCredentialMismatch] = useState(false)
-  const [usagePoliciesUrl, setUsagePoliciesUrl] = useState<string | undefined>()
+  const [credentialMismatch, setCredentialMismatch] = useState(cached?.kind === 'mismatch')
+  const [usagePoliciesUrl, setUsagePoliciesUrl] = useState<string | undefined>(
+    cached?.status.usagePoliciesUrl
+      ?? (cached?.kind === 'ok' ? cached.balance.usagePoliciesUrl : undefined),
+  )
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
+    const hit = !force ? peekWalletCache(locale) : undefined
+    if (hit !== undefined) {
+      applySnapshot(
+        hit,
+        walletT(locale),
+        setData,
+        setUsagePoliciesUrl,
+        setCredentialMismatch,
+        setError,
+        onBalanceChange,
+      )
+      setSessionRevoked(false)
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError(undefined)
     setSessionRevoked(false)
     setCredentialMismatch(false)
     const dict = walletT(locale)
     try {
-      const status = await fetchWalletStatus()
-      setUsagePoliciesUrl(status.usagePoliciesUrl)
-      if (status.connected && status.credentialAligned === false) {
-        setData(undefined)
-        setCredentialMismatch(true)
-        setError(dict('keyMismatchHint'))
-        onBalanceChange?.(undefined)
-        return
-      }
-      const balance = await fetchWalletBalance(locale)
-      setData(balance)
-      setUsagePoliciesUrl(balance.usagePoliciesUrl)
-      onBalanceChange?.(balance)
+      const snapshot = await loadWalletSnapshot(locale, force)
+      applySnapshot(
+        snapshot,
+        dict,
+        setData,
+        setUsagePoliciesUrl,
+        setCredentialMismatch,
+        setError,
+        onBalanceChange,
+      )
     } catch (cause: unknown) {
       setData(undefined)
       onBalanceChange?.(undefined)
@@ -74,13 +117,13 @@ export function WalletPanel({ locale, onClose, onBalanceChange }: WalletPanelPro
   }, [locale, onBalanceChange])
 
   useEffect(() => {
-    void load()
+    void load(false)
   }, [load])
 
   useEffect(() => {
     if (sessionRevoked || credentialMismatch) return
     const timer = window.setInterval(() => {
-      void load()
+      void load(true)
     }, WALLET_POLL_MS)
     return () => { window.clearInterval(timer) }
   }, [credentialMismatch, load, sessionRevoked])
@@ -99,14 +142,30 @@ export function WalletPanel({ locale, onClose, onBalanceChange }: WalletPanelPro
     ? undefined
     : formatWalletUnixDate(data.periodEndUnix, locale)
   const softHint = sessionRevoked || credentialMismatch
+  const orgName = data !== undefined && data.name.length > 0 ? data.name : undefined
 
   return (
-    <div className={css.panel} role="dialog" aria-modal="true" aria-labelledby="x6-wallet-title">
+    <div
+      className={embedded ? css.pagePanel : css.panel}
+      role={embedded ? 'region' : 'dialog'}
+      {...(embedded ? {} : { 'aria-modal': true as const })}
+      aria-labelledby="x6-wallet-title"
+    >
       <div className={css.header}>
         <h2 className={css.title} id="x6-wallet-title">{t('title')}</h2>
-        <button type="button" className={css.closeBtn} aria-label={t('close')} onClick={onClose}>
-          ×
-        </button>
+        <div className={css.headerAside}>
+          {orgName !== undefined ? (
+            <div className={css.orgBlock}>
+              <p className={css.orgCaption}>{t('orgLabel')}</p>
+              <p className={css.orgName}>{orgName}</p>
+            </div>
+          ) : null}
+          {embedded ? null : (
+            <button type="button" className={css.closeBtn} aria-label={t('close')} onClick={onClose}>
+              ×
+            </button>
+          )}
+        </div>
       </div>
 
       {loading && data === undefined && !credentialMismatch ? (
@@ -115,77 +174,43 @@ export function WalletPanel({ locale, onClose, onBalanceChange }: WalletPanelPro
 
       {data !== undefined ? (
         <>
-          <div className={css.tabBar}>
-            <div className={css.segmentGroup} role="tablist" aria-label={t('title')} id={tabListId}>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === 'account'}
-                className={tab === 'account' ? css.segmentButtonActive : css.segmentButton}
-                onClick={() => { setTab('account') }}
-              >
-                {t('tabAccount')}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={tab === 'subscription'}
-                className={tab === 'subscription' ? css.segmentButtonActive : css.segmentButton}
-                onClick={() => { setTab('subscription') }}
-              >
-                {t('tabSubscription')}
-              </button>
-            </div>
-          </div>
-
-          {tab === 'account' ? (
-            <div className={css.balanceBlock} role="tabpanel">
-              <p className={css.balanceLabel}>{t('balanceLabel')}</p>
-              <p className={css.balanceValue}>
+          <div className={css.metricGrid}>
+            <section className={`${css.metricCard} ${css.metricCardBalance}`} aria-label={t('balanceLabel')}>
+              <p className={css.metricLabel}>{t('balanceLabel')}</p>
+              <p className={`${css.metricValue} ${css.metricValueBalance}`}>
                 {formatWalletAmount(data.availableBalance, data.currency)}
               </p>
-              {data.name.length > 0 ? (
-                <p className={css.orgRow}>
-                  {t('orgLabel')}
-                  {': '}
-                  {data.name}
-                </p>
-              ) : null}
-            </div>
-          ) : (
-            <div className={css.balanceBlock} role="tabpanel">
-              <p className={css.balanceLabel}>{t('pointsLabel')}</p>
-              <p className={css.balanceValue}>
+            </section>
+            <section className={`${css.metricCard} ${css.metricCardPoints}`} aria-label={t('pointsLabel')}>
+              <p className={css.metricLabel}>{t('pointsLabel')}</p>
+              <p className={`${css.metricValue} ${css.metricValuePoints}`}>
                 {formatPointsRemaining(data.pointsRemaining, locale)}
               </p>
-              {data.pointsGranted.length > 0 && data.pointsGranted !== '0' ? (
-                <p className={css.orgRow}>
-                  {t('pointsGrantedLabel')}
-                  {': '}
-                  {formatPointsRemaining(data.pointsGranted, locale)}
-                </p>
-              ) : null}
+            </section>
+          </div>
 
-              {resetAt !== undefined ? (
-                <p className={css.orgRow}>
-                  {t('resetAtLabel')}
-                  {': '}
-                  {resetAt}
-                </p>
-              ) : null}
-              {periodEnd !== undefined ? (
-                <p className={css.orgRow}>
-                  {t('periodEndLabel')}
-                  {': '}
-                  {periodEnd}
-                </p>
-              ) : null}
-            </div>
-          )}
+          <dl className={css.metaList}>
+            {data.pointsGranted.length > 0 && data.pointsGranted !== '0' ? (
+              <div className={css.metaRow}>
+                <dt>{t('pointsGrantedLabel')}</dt>
+                <dd>{formatPointsRemaining(data.pointsGranted, locale)}</dd>
+              </div>
+            ) : null}
+            {resetAt !== undefined ? (
+              <div className={css.metaRow}>
+                <dt>{t('resetAtLabel')}</dt>
+                <dd>{resetAt}</dd>
+              </div>
+            ) : null}
+            {periodEnd !== undefined ? (
+              <div className={css.metaRow}>
+                <dt>{t('periodEndLabel')}</dt>
+                <dd>{periodEnd}</dd>
+              </div>
+            ) : null}
+          </dl>
         </>
       ) : null}
-
-      <p className={css.notice}>{t('visibilityHint')}</p>
 
       {error !== undefined ? (
         <p className={softHint ? css.hint : css.error}>{error}</p>
@@ -206,7 +231,7 @@ export function WalletPanel({ locale, onClose, onBalanceChange }: WalletPanelPro
           type="button"
           className={css.buttonSecondary}
           disabled={loading}
-          onClick={() => { void load() }}
+          onClick={() => { void load(true) }}
         >
           {t('refresh')}
         </button>

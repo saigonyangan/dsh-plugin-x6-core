@@ -1,8 +1,10 @@
 import type { SupaLine } from './line.ts'
 
-/** Connection fetch routes (GET only). */
+/** Connection fetch routes. */
 export const AUTH_START_PATH = '/api/x6.auth.start' as const
 export const AUTH_STATUS_PATH = '/api/x6.auth.status' as const
+/** Manual API key → store credential + return provider material. */
+export const AUTH_APPLY_KEY_PATH = '/api/x6.auth.apply-key' as const
 
 /** Auth flow phases exposed to the browser. */
 export type AuthPhase =
@@ -32,7 +34,13 @@ export interface ProviderModelEntry {
 /** Successful auth.start response. */
 export interface AuthStartResponse {
   readonly flowId: string
+  /** Browser-open URL (harness authorize; may redirect to console). */
   readonly authorizeUrl: string
+  /**
+   * Prefer this for「复制登录链接」when present — usually the X6 console
+   * login page after following the authorize redirect.
+   */
+  readonly copyUrl?: string
   readonly line: SupaLine
   readonly latencyMs: number
 }
@@ -55,6 +63,15 @@ export interface AuthStatusResponse {
   readonly models?: readonly ProviderModelEntry[]
   readonly credentialRef?: string
   readonly message?: string
+}
+
+/** auth.apply-key success body (credential already stored on Host). */
+export interface AuthApplyKeyResponse {
+  readonly baseURL: string
+  readonly models: readonly ProviderModelEntry[]
+  readonly credentialRef: string
+  readonly line: SupaLine
+  readonly latencyMs: number
 }
 
 /** JSON error body for plugin API routes. */
